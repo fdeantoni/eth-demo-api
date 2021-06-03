@@ -24,8 +24,7 @@ VAULT_ADDRESS="<contract address of your DemoVault contract>"
 ```
 
 Make sure to set `MNEMONIC`, `INFURA_PROJECT`, and `VAULT_ADDRESS` to
-suit your environment. For `VAULT_ADDRESS` do not include the initial `0x`
-from the `contract_address` string.
+suit your environment. 
 
 ## Run App ##
 
