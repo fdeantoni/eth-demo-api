@@ -1,13 +1,12 @@
 mod validate;
 
-use std::{convert::Infallible, net::SocketAddr};
+use std::net::SocketAddr;
 
-use warp::Filter;
 use crate::validate::Validator;
+use warp::Filter;
 
 #[tokio::main]
 async fn main() {
-
     let path = std::path::Path::new(".env");
     dotenv::from_path(path).ok();
 
@@ -19,20 +18,18 @@ async fn main() {
     let validator = Validator::new();
 
     let hello = warp::path!("hello" / String)
-        .and(with_validator(validator))
+        .and(warp::any().map(move || validator.clone()))
         .and(warp::addr::remote())
         .and_then(response);
 
-    warp::serve(hello)
-        .run(([127, 0, 0, 1], 3030))
-        .await;
+    warp::serve(hello).run(([127, 0, 0, 1], 3030)).await;
 }
 
-fn with_validator(validator: Validator) -> impl Filter<Extract = (Validator,), Error = Infallible> + Clone {
-    warp::any().map(move || validator.clone())
-}
-
-async fn response(name: String, validator: Validator, remote: Option<SocketAddr>) -> Result<impl warp::Reply, warp::Rejection> {
+async fn response(
+    name: String,
+    validator: Validator,
+    remote: Option<SocketAddr>,
+) -> Result<impl warp::Reply, warp::Rejection> {
     if let Some(addr) = remote {
         let ip_string = addr.ip().to_string();
         if validator.is_valid(ip_string.clone()).await {
